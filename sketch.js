@@ -2,48 +2,39 @@ const xValues = [];
 const yValues = [];
 const blob = [];
 const fileData = "";
-const step = false;
 
 function setup() {
 	noCanvas();
-	//console.log("About to fetch data");
 
+	// Creates a choose file button.
 	createFileInput(fileSelected);
 
+	// Creates a variable "button" from the existing button in html.
 	const button = select("#createTextButton");
 	button.mousePressed(createBlob);
 }
 
-function draw() {
-	if (this.step) {
-		createP("Ready");
-		this.step = false;
-	}
-}
-
+// Checks the file selected if it's a text file and initiates getData();
 function fileSelected(file) {
-	//console.log(file);
 	if (file.type == "text" && file.subtype == "plain") {
 		this.fileData = file.data;
+		getData();
 	} else {
 		createP("I need a text file.");
 	}
-	getData();
 }
 
+// Saves the coordinates as a list in a text file.
 function createBlob() {
 	for (let i = 0; i < xValues.length; i++) {
 		blob.push("x: " + String(xValues[i]) + ", y: " + String(yValues[i]))
 	}
-	//console.log(blob);
 	saveStrings(blob, 'coodrinateList.txt');
 }
 
+// Gets the data from the file selected and parse it.
 async function getData() {
-	//const response = await fetch("text/test.txt");
-	//const data = await response.text();
 	const data = this.fileData;
-	//console.log(data);
 
 	const points = data.split(" ");
 	points.forEach(coordinates => {
@@ -54,5 +45,5 @@ async function getData() {
 		xValues.push(xValue);
 		yValues.push(yValue);
 	})
-	this.step = true;
+	createP("Ready");
 }
