@@ -1,15 +1,14 @@
 const xValues = [];
 const yValues = [];
 const blob = [];
-var equation = "";
 
 function setup() {
 	noCanvas();
 
-	// Creates a choose file button.
+	// Creates a "choose file" button.
 	createFileInput(fileSelected);
 
-	// Creates a variable "cButton" from the existing button in html.
+	// Creates a variable from the existing button in html.
 	const cButton = select("#createTextButton");
 	cButton.mousePressed(createBlob);
 
@@ -28,10 +27,7 @@ function fileSelected(file) {
 
 // Gets the data from the file selected and parse it.
 async function getData(data) {
-	//const response = await fetch("text/LIP-test.txt");
-	//const data = await response.text();
-	//console.log(data);
-
+	;
 	const points = data.split(" ");
 	points.forEach(coordinates => {
 		const points = coordinates.split(",");
@@ -42,8 +38,6 @@ async function getData(data) {
 		yValues.push(yValue);
 	})
 	createP("Ready");
-	//console.log(xValues);
-	//console.log(yValues);
 }
 
 // Saves the coordinates as a list in a text file.
@@ -54,23 +48,24 @@ function createBlob() {
 	saveStrings(blob, 'coodrinateList.txt');
 }
 
+// Generates Lagrange Interpolating Polynomial using the coordinates.
+// Then saves it the equation as a text file.
+
 function generateLIP() {
 	var i = 0;
 	var j = 0;
 	var k = 0;
 
-	var nom = "";
 	var den = 1;
+	var nom = "";
+	var equation = "";
 
 	const noms = []
 	const dens = [];
 
-	const arrayLength = xValues.length;
-	//console.log(arrayLength);
+	while (j < (xValues.length)) {
 
-	while (j < arrayLength) {
-
-		if (k == arrayLength) {
+		if (k == (xValues.length)) {
 			k = 0;
 			j++;
 			dens.push(den);
@@ -88,19 +83,15 @@ function generateLIP() {
 		}
 
 	}
-	//console.log(dens);
-	//console.log(noms);
 
-	while (i < (arrayLength - 1)) {
+	while (i < ((yValues.length) - 1)) {
 		equation += "{" + noms[i] + "} / {" + String(dens[i]) + "}" + " + ";
 		i++;
 	}
 
-	if (i == (arrayLength - 1)) {
+	if (i == ((yValues.length) - 1)) {
 		equation += "{" + noms[i] + "} / {" + String(dens[i]) + "}";
 	}
-
-	console.log(equation);
 
 	saveStrings([equation], 'Curve.txt');
 }
