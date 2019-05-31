@@ -1,6 +1,7 @@
-const xValues = [];
-const yValues = [];
-const blob = [];
+let xValues = [];
+let yValues = [];
+let blob = [];
+let p1, p2;
 
 function setup() {
 	noCanvas();
@@ -14,6 +15,13 @@ function setup() {
 
 	const lButton = select("#LIPButton");
 	lButton.mousePressed(generateLIP);
+
+	//Creates two <p> elements and hides them.
+	p1 = createP("Ready");
+	p1.hide();
+
+	p2 = createP("It's not continuous.");
+	p2.hide();
 }
 
 // Checks the file selected if it's a text file and initiates getData();
@@ -27,8 +35,14 @@ function fileSelected(file) {
 
 // Gets the data from the file selected and parse it.
 async function getData(data) {
-	;
-	const points = data.split(" ");
+	let points = [];
+	xValues = [];
+	yValues = [];
+
+	p1.hide();
+	p2.hide();
+
+	points = data.split(" ");
 	points.forEach(coordinates => {
 		const points = coordinates.split(",");
 		const xValue = points[0];
@@ -37,11 +51,12 @@ async function getData(data) {
 		xValues.push(xValue);
 		yValues.push(yValue);
 	})
-	createP("Ready");
+	p1.show();
 }
 
 // Saves the coordinates as a list in a text file.
 function createBlob() {
+	blob = [];
 	for (let i = 0; i < xValues.length; i++) {
 		blob.push("x: " + String(xValues[i]) + ", y: " + String(yValues[i]))
 	}
@@ -52,46 +67,68 @@ function createBlob() {
 // Then saves it the equation as a text file.
 
 function generateLIP() {
-	var i = 0;
-	var j = 0;
-	var k = 0;
+	let i = 0;
+	let j = 0;
+	let k = 0;
 
-	var den = 1;
-	var nom = "";
-	var equation = "";
+	let den = 1;
+	let nom = "";
+	let equation = "";
 
 	const noms = []
 	const dens = [];
 
-	while (j < (xValues.length)) {
+	let continuous = checkContinuity();
+	p2.hide();
 
-		if (k == (xValues.length)) {
-			k = 0;
-			j++;
-			dens.push(den);
-			den = 1;
-			noms.push(nom + yValues[j - 1]);
-			nom = "";
+	if (continuous) {
+
+		while (j < (xValues.length)) {
+
+			if (k == (xValues.length)) {
+				k = 0;
+				j++;
+				dens.push(den);
+				den = 1;
+				noms.push(nom + yValues[j - 1]);
+				nom = "";
+			}
+
+			if (j == k) {
+				k++;
+			} else {
+				den *= (float(xValues[j]) - float(xValues[k]));
+				nom += ("(x - " + xValues[k] + ") * ");
+				k++;
+			}
+
 		}
 
-		if (j == k) {
-			k++;
-		} else {
-			den *= (float(xValues[j]) - float(xValues[k]));
-			nom += ("(x - " + xValues[k] + ") * ");
-			k++;
+		while (i < ((yValues.length) - 1)) {
+			equation += "{" + noms[i] + "} / {" + String(dens[i]) + "}" + " + ";
+			i++;
 		}
 
-	}
+		if (i == ((yValues.length) - 1)) {
+			equation += "{" + noms[i] + "} / {" + String(dens[i]) + "}";
+		}
 
-	while (i < ((yValues.length) - 1)) {
-		equation += "{" + noms[i] + "} / {" + String(dens[i]) + "}" + " + ";
-		i++;
-	}
+		saveStrings([equation], 'Curve.txt');
 
-	if (i == ((yValues.length) - 1)) {
-		equation += "{" + noms[i] + "} / {" + String(dens[i]) + "}";
+	} else {
+		p2.show();
 	}
+}
 
-	saveStrings([equation], 'Curve.txt');
+// Checks if the curve is continuous.
+function checkContinuity() {
+	let arr = xValues.slice().sort();
+	let continuity = true;
+
+	for (let i = 0; i < (arr.length - 1); i++) {
+		if (arr[i + 1] == arr[i]) {
+			continuity = false;
+		}
+	}
+	return continuity;
 }
